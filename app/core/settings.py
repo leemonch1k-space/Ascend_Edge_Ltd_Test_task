@@ -20,7 +20,7 @@ class BaseAppSettings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:
-        return f"sqlite+aiosqlite:///{self.BASE_DIR}/postgres_db"
+        return f"sqlite+aiosqlite:///{self.BASE_DIR}/local_crm.db"
 
 class Settings(BaseAppSettings):
     ENVIRONMENT: str = "docker"
