@@ -19,8 +19,9 @@ class BaseAppSettings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
 
     @property
-    def DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> str: # noqa
         return f"sqlite+aiosqlite:///{self.BASE_DIR}/local_crm.db"
+
 
 class Settings(BaseAppSettings):
     ENVIRONMENT: str = "docker"
@@ -33,10 +34,9 @@ class Settings(BaseAppSettings):
 
     @computed_field
     @property
-    def DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> str: # noqa
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}"
             f":{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}"
             f":{self.POSTGRES_DB_PORT}/{self.POSTGRES_DB}"
         )
-

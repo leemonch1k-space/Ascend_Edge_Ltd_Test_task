@@ -3,12 +3,17 @@ from typing import Dict, Any
 from app.interfaces import BaseAIService
 from app.schemas import AIAnalysisResult
 
+
 class AIEvaluator(BaseAIService):
     """
     Ai-evaluator, which based on current business logic.
     Perfectly suitable as first phase before implements full-fledged ML-model
     """
-    async def evaluate_lead(self, lead_data: Dict[str, Any]) -> AIAnalysisResult:
+
+    async def evaluate_lead(
+            self,
+            lead_data: Dict[str, Any]
+    ) -> AIAnalysisResult:
         score = 0.0
         reasons = []
 
@@ -54,5 +59,5 @@ class AIEvaluator(BaseAIService):
         return AIAnalysisResult(
             score=round(final_score, 2),
             recommendation=recommendation,
-            reason=" | ".join(reasons)
+            reason=" | ".join(reasons),
         )

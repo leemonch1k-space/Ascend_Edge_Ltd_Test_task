@@ -7,7 +7,6 @@ from app.enums.customer_enums import LeadStage, SaleStage
 from app.schemas import LeadCreate
 from app.interfaces import BaseAIService
 
-
 # Allowed transitions map
 ALLOWED_TRANSITIONS = {
     LeadStage.NEW: {LeadStage.CONTACTED, LeadStage.LOST},
@@ -19,7 +18,11 @@ ALLOWED_TRANSITIONS = {
 
 
 class LeadService:
-    def __init__(self, db: AsyncSession, ai_service: BaseAIService):
+    def __init__(
+            self,
+            db: AsyncSession,
+            ai_service: BaseAIService
+    ) -> None:
         self.db = db
         self.ai_service = ai_service
 
@@ -29,7 +32,7 @@ class LeadService:
             source=data.source,
             business_domain=data.business_domain,
             stage=LeadStage.NEW,
-            activity_count=0
+            activity_count=0,
         )
         self.db.add(new_lead)
         await self.db.commit()
@@ -40,7 +43,9 @@ class LeadService:
         result = await self.db.execute(select(Lead).where(Lead.id == lead_id))
         lead = result.scalar_one_or_none()
         if not lead:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Lead not found"
+            )
         return lead
 
     async def update_stage(self, lead_id: int, new_stage: LeadStage) -> Lead:
@@ -50,13 +55,13 @@ class LeadService:
         if lead.stage == LeadStage.TRANSFERRED:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Cannot change stage of a transferred lead"
+                detail="Cannot change stage of a transferred lead",
             )
 
         if new_stage not in ALLOWED_TRANSITIONS.get(lead.stage, set()):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid transition from {lead.stage} to {new_stage}"
+                detail=f"Invalid transition from {lead.stage} to {new_stage}",
             )
 
         lead.stage = new_stage
@@ -72,8 +77,10 @@ class LeadService:
         lead_data = {
             "source": lead.source.value if lead.source else None,
             "stage": lead.stage.value,
-            "business_domain": lead.business_domain.value if lead.business_domain else None,
-            "activity_count": lead.activity_count
+            "business_domain": (
+                lead.business_domain.value if lead.business_domain else None
+            ),
+            "activity_count": lead.activity_count,
         }
 
         ai_result = await self.ai_service.evaluate_lead(lead_data)
@@ -90,21 +97,18 @@ class LeadService:
         if not lead.business_domain:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Lead must have a business domain to be transferred."
+                detail="Lead must have a business domain to be transferred.",
             )
 
         if lead.ai_score is None or lead.ai_score < 0.6:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Lead AI score must be evaluated and >= 0.6."
+                detail="Lead AI score must be evaluated and >= 0.6.",
             )
 
         await self.update_stage(lead.id, LeadStage.TRANSFERRED)
 
-        new_sale = Sale(
-            lead_id=lead.id,
-            stage=SaleStage.NEW
-        )
+        new_sale = Sale(lead_id=lead.id, stage=SaleStage.NEW)
         self.db.add(new_sale)
         await self.db.commit()
         await self.db.refresh(new_sale)

@@ -8,6 +8,7 @@ class LeadCreate(BaseModel):
     source: LeadSource
     business_domain: Optional[BusinessDomain] = None
 
+
 class LeadResponse(BaseModel):
     id: int
     source: LeadSource
@@ -17,6 +18,7 @@ class LeadResponse(BaseModel):
     ai_score: Optional[float]
 
     model_config = ConfigDict(from_attributes=True)
+
 
 class StageUpdate(BaseModel):
     new_stage: LeadStage

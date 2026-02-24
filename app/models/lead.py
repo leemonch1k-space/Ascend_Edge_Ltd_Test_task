@@ -8,6 +8,7 @@ from app.enums import (
     BusinessDomain,
 )
 
+
 class Lead(Base):
     __tablename__ = "leads"
 
