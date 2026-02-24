@@ -1,6 +1,6 @@
 import os
 
-from app.core import BaseAppSettings, Settings
+from app.core.settings import BaseAppSettings, Settings
 
 
 def get_settings() -> BaseAppSettings:
